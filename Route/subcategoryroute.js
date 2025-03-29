@@ -1,33 +1,35 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const subCategoryController= require('../Controller/subCategoryController')
-const {isAdmin}=require('../middleware/auth')
-const multer = require('../Multier/multer')
+const subCategoryController = require("../Controller/subCategoryController");
 
-
-router
- .route('/create')
-.post(isAdmin,multer.singleFileUpload,subCategoryController.subCategoryCreate)
-
+const multer = require("../Multer/multer");
 
 router
-.route('/update/:id')
-.patch(isAdmin,multer.singleFileUpload,subCategoryController.subCategoryUpdate)
+  .route("/")
+  .post(
+    
+    multer.singleFileUpload,
+    subCategoryController.CreateSubCategory
+  );
 
 router
-.route('/delete/:id')
-.delete(isAdmin,subCategoryController.subCategoryDelete)
-router
-.route('/getall')
-.post(isAdmin,subCategoryController.subCategoryGetAll)
+  .route("/:id")
+  .patch(
+    
+    multer.singleFileUpload,
+    subCategoryController.UpdateSubCategory
+  );
 
 router
-.route('/getById/:id')
-.post(isAdmin,subCategoryController.subCategoryGetById)
+  .route("/:id")
+  .delete(subCategoryController.DeleteSubCategory);
+router.route("/").get( subCategoryController.GetAllSubCategory);
+
+router
+  .route("/:id")
+  .get(subCategoryController.GetByIdSubCategory);
 
 
-
- 
 
 
 module.exports = router;

@@ -12,6 +12,7 @@ const bannerSchema = new mongoose.Schema(
     },
     image: {
       type: String,
+      required: [true, "plese provide image"],
     },
     status: {
       type: String,
@@ -21,11 +22,11 @@ const bannerSchema = new mongoose.Schema(
     startDate: {
       type: Date,
       default: Date.now,
-      required:true
+      required: true,
     },
     endDate: {
       type: Date,
-      required:true
+      required: true,
     },
   },
 
@@ -36,6 +37,5 @@ const bannerSchema = new mongoose.Schema(
   }
 );
 
-const Banner = mongoose.model("Banner", bannerSchema);
-
+const Banner = mongoose.models.Banner || mongoose.model("Banner", bannerSchema);
 module.exports = Banner;

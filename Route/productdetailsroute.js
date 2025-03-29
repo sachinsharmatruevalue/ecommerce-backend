@@ -1,32 +1,14 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const productDetailsController= require('../Controller/productDetailsController')
-const {isAdmin}=require('../middleware/auth')
+const productDetailsController = require("../Controller/productDetailsController");
 
 
+router.route("/").post( productDetailsController.create);
 
-router
- .route('/create')
-.post(isAdmin,productDetailsController.create)
+router.route("/:id").patch(productDetailsController.update);
 
-
-router
-.route('/update/:id')
-.patch(isAdmin,productDetailsController.update)
-
-router
-.route('/delete/:id')
-.delete(isAdmin,productDetailsController.delete)
-router
-.route('/getAll')
-.post(isAdmin,productDetailsController.getAll)
-router
-.route('/getById/:id')
-.post(isAdmin,productDetailsController.getById)
-
-
-
- 
-
+router.route("/:id").delete(productDetailsController.delete);
+router.route("/").get(productDetailsController.getAll);
+router.route("/:id").get(productDetailsController.getById);
 
 module.exports = router;

@@ -1,23 +1,24 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-// Brand Schema
 const BrandSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      unique: true,  // Ensure each Brand has a unique name
-      required:[true,'plese provide '],
+      required: [true, "plese provide "],
+    },
+    image: {
+      type: String, // Stores image URL or file path
+      required: [true, "plese provide "],
     },
     status: {
       type: String,
-      enum: ['Active', 'Inactive'], // Only two valid states for the category
-      default: 'Active',
+      default: "Active",
+      enum: ["Active", "Inactive"],
     },
   },
-  { timestamps: true }
+  { timestamps: true } // Automatically adds createdAt and updatedAt fields
 );
 
-// Create Category model
-const Brand = mongoose.model('Brand', BrandSchema);
+const Brand = mongoose.models.Brand || mongoose.model("Brand", BrandSchema);
 
 module.exports = Brand;

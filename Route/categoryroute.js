@@ -1,32 +1,19 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const categoryController= require('../Controller/categoryController')
-const {isAdmin}=require('../middleware/auth')
-const multer = require('../Multier/multer')
+const categoryController = require("../Controller/categoryController");
 
-
-router
- .route('/create')
-.post(isAdmin,multer.singleFileUpload,categoryController.categoryCreate)
-
+const multer = require("../Multer/multer");
 
 router
-.route('/update/:id')
-.patch(isAdmin,multer.singleFileUpload,categoryController.categoryUpdate)
+  .route("/")
+  .post( multer.singleFileUpload, categoryController.CreateCategory);
 
 router
-.route('/delete/:id')
-.delete(isAdmin,categoryController.categoryDelete)
-router
-.route('/getAll')
-.post(isAdmin,categoryController.categoryGetAll)
-router
-.route('/getById/:id')
-.post(isAdmin,categoryController.categoryGetById)
+  .route("/:id")
+  .patch(multer.singleFileUpload, categoryController.UpdateCategory);
 
-
-
- 
-
+router.route("/:id").delete( categoryController.DeleteCategory);
+router.route("/").get(categoryController.GetAllCategory);
+router.route("/:id").get( categoryController.GetByIdCategory);
 
 module.exports = router;

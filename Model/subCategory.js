@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // Category Schema
 const subcategorySchema = new mongoose.Schema(
@@ -8,7 +8,7 @@ const subcategorySchema = new mongoose.Schema(
       required: true,
       unique: true,
       trim: true, // Remove leading and trailing spaces
-      required:[true,'plese provide '],
+      required: [true, "plese provide "],
     },
     description: {
       type: String,
@@ -16,27 +16,25 @@ const subcategorySchema = new mongoose.Schema(
     },
     Category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'category', // Reference to another category for parent-child relationship
-      required:[true,'plese provide '],
+      ref: "Category", // Reference to another category for parent-child relationship
+      required: true
     },
     Categoryname: {
       type: String,
-      required:[true,'plese provide '],
     },
     image: {
-      type: String,  // URL of the category image (optional)
+      type: String, // URL of the category image (optional)
+      required: true
     },
     status: {
       type: String,
-      enum: ['Active', 'Inactive'],
-      default: 'Active',
+      enum: ["Active", "Inactive"],
+      default: "Active",
     },
-
   },
   { timestamps: true }
 );
 
-// Create Category model
-const subCategory = mongoose.model('subCategory', subcategorySchema);
+const SubCategory = mongoose.models.SubCategory || mongoose.model("SubCategory", subcategorySchema);
+module.exports = SubCategory;
 
-module.exports = subCategory;

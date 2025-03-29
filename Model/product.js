@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 
 // Product Schema
-
 const productSchema = new mongoose.Schema(
   {
     name: {
@@ -13,59 +12,70 @@ const productSchema = new mongoose.Schema(
       type: String,
       trim: true, // Remove extra spaces
     },
+    productkey: [
+      {
+        Size: {
+          type: String,
+         
+        },
+        Quantity: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+       
+        OfferPrice: {
+          type: Number,
+          min: 0,
+        },
+      },
+    ],
     price: {
       type: Number,
       required: true,
       min: 0,
     },
-    offerprice: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    brand: {
+    brand: [
+      {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "brand", // Link the product to a subcategory (a category with a parentCategory set)
-        required: true,
+        ref: "brand",
       },
-    brandName: {
-      type: String,
-      require: true,
-    },
+    ],
+    brandname: [
+      {
+        type: String,
+      },
+    ],
     subCategory: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "subCategory", // Link the product to a subcategory (a category with a parentCategory set
         required: true,
+        ref: "subCategory",
       },
     ],
     subCategoryname: [
       {
         type: String,
-        required: true,
       },
     ],
     category: [
       {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: "category",
+        ref: "Category",
       },
     ],
     categoryname: [
       {
         type: String,
-        required: true,
       },
     ],
-
     images: [
       {
         type: String, // URL to the product image
         required: true,
       },
     ],
-
     status: {
       type: String,
       enum: ["Active", "Inactive"],
@@ -76,6 +86,6 @@ const productSchema = new mongoose.Schema(
 );
 
 // Create Product model
-const Product = mongoose.model("Product", productSchema);
+const Product = mongoose.models.Product || mongoose.model("Product", productSchema);
 
 module.exports = Product;

@@ -1,32 +1,21 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const userController = require('../Controller/userController');
-
-// Register route
-//router.post('/register', authController.register);
-
-router
- .route('/register')
- .post(userController.register)
+const userController = require("../Controller/userController");
+const {isAuth}=require('../Middleware/auth')
 
 
-// Login route
-//router.post('/login', authController.login);
-router
- .route('/login')
- .post(userController.login)
 
- //update route
- 
- router
- .route('/updatedata/:id')
- .put(userController.updatedata)
+router.route("/register").post(userController.register);
+router.route('/profile').get( isAuth,userController.me);
+
+router.route("/login").post(userController.login);
 
 
- router
- .route('/verifysignup')
- .post(userController. verifyOTPForSignUp )
+router.route("/").get(userController.GetUser);
 
+router.route("/:id").patch(userController.updatedata);
 
+router.route("/verifysignup").post(userController.verifyOTPForSignUp);
+router.route("/:id").delete(userController.deleteUserById);
 
 module.exports = router;

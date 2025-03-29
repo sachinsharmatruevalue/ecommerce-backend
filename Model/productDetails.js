@@ -20,7 +20,7 @@ const productetailsSchema = new mongoose.Schema(
     product: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref:'product'
+      ref: "Product",
     },
 
     status: {

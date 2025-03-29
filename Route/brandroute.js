@@ -1,35 +1,21 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const brandController = require('../Controller/brandController');
-
-const {isAdmin}=require('../middleware/auth')
+const brandController = require("../Controller/brandController");
+const multer = require("../Multer/multer");
 
 
 router
-.route('/create')
-.post(isAdmin,brandController.create);
+  .route("/")
+  .post(multer.singleFileUpload, brandController.CreateBrand);
 
 router
-.route('/update/:id')
-.patch(isAdmin,brandController.update);
+  .route("/:id")
+  .patch(multer.singleFileUpload, brandController.UpdateBrand);
 
-router
-.route('/getAll')
-.post(isAdmin,brandController.getAll);
+router.route("/").get(brandController.GetAllBrand);
 
-router
-.route('/get/:id')
-.post(isAdmin,brandController.get);
+router.route("/:id").get(brandController.GetByIdBrand);
 
-router
-.route('/delete/:id')
-.delete(isAdmin,brandController.delete);
-
-
-
-
-
-
-
+router.route("/:id").delete(brandController.DeleteBrand);
 
 module.exports = router;
