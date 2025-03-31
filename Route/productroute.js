@@ -19,7 +19,7 @@ router
 router.route("/:id").get(productController.GetByIdProduct);
 
 router
-.route("/:categoryId")
+.route("/subCategories/:categoryId")
 .get(productController.getSubCategoryByCategory);
 
 router.route("/").delete(productController.deletedProductimage);

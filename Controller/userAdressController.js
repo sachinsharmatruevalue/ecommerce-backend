@@ -40,11 +40,19 @@ exports.CreateUserAddress = async (req, res) => {
 
 exports.GetAllAddresses = async (req, res) => {
   try {
-    const addresses = await UserAddress.find().sort({ created: -1 });
+    const addresses = await UserAddress.find()
+      .populate("user", "username") // Populate user details (adjust field names accordingly)
+      .sort({ created: -1 });
+
     if (!addresses.length) {
       return res.status(200).json({ status: true, message: "No addresses found", data: [] });
     }
-    res.status(200).json({ status: true, message: "Address list retrieved", data: addresses });
+
+    res.status(200).json({
+      status: true,
+      message: "Address list retrieved successfully",
+      data: addresses,
+    });
   } catch (error) {
     res.status(500).json({ status: false, error: error.message });
   }

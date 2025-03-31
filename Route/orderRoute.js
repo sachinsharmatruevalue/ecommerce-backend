@@ -8,18 +8,18 @@ router
 .post(orderController.orderItem)
 
 router
-.route('/:orderId')
+.route('/:id')
 .delete(orderController.orderCancel)
 
 router
-.route('/:orderId')
+.route('/:id')
 .get(orderController.Getorder)
 router
 .route('/')
 .get(orderController.getAllOrders)
 
-router
-.route('/:orderId')
+router 
+.route('/:id')
 .get(orderController.orderUpdate)
 
 

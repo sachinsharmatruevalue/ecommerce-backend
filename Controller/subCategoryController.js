@@ -132,7 +132,7 @@ exports.GetByIdSubCategory = async (req, res) => {
 
   try {
     const id = req.params.id;
-    const SubCat = await SubCategory.findById(id).populate('Category');
+    const SubCat = await SubCategory.findById(id);
     if (SubCat.length == 0) {
       return res
         .status(404)

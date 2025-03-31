@@ -1,28 +1,28 @@
 const mongoose = require("mongoose");
 
-// Product Schema
-
-const productetailsSchema = new mongoose.Schema(
+// Product Details Schema
+const productDetailsSchema = new mongoose.Schema(
   {
     size: {
       type: String,
+      
     },
     quantity: {
       type: Number,
+    
     },
     offerprice: {
       type: Number,
     },
-
     price: {
       type: Number,
+     
     },
     product: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: "Product",
+      ref: "Product", // References the Product model
     },
-
     status: {
       type: String,
       enum: ["Active", "Inactive"],
@@ -32,7 +32,7 @@ const productetailsSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Create Product model
-const Productdetails = mongoose.model("Productdetails", productetailsSchema);
+// Create Productdetails model
+const Productdetails = mongoose.model("Productdetails", productDetailsSchema);
 
 module.exports = Productdetails;

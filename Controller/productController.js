@@ -50,7 +50,11 @@ exports.CreateProduct = async (req, res) => {
 
 exports.GetAllProduct = async (req, res) => {
   try {
-    const product = await Product.find().sort({ created: -1 });
+    const product = await Product.find().populate("category") // Populate category field, only returning 'name'
+    .populate("subCategory") // Populate subcategory field, only returning 'name'
+    .populate("brand")
+
+  .sort({ created: -1 });
 
     if (product.length === 0) {
       return res
@@ -169,7 +173,7 @@ exports.GetByIdProduct = async (req, res) => {
  
   try {
     const id = req.params.id;
-    const product = await Product.findById(id).populate('category');
+    const product = await Product.findById(id).populate('category','subCategory','Brand');
     res
       .status(400)
       .json({

@@ -38,7 +38,7 @@ const productSchema = new mongoose.Schema(
     brand: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "brand",
+        ref: "Brand",
       },
     ],
     brandname: [
@@ -50,7 +50,7 @@ const productSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: "subCategory",
+        ref: "SubCategory",
       },
     ],
     subCategoryname: [

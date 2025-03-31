@@ -3,7 +3,7 @@ const Order = require('../Model/order');
 const Product = require("../model/product");
 const User=require('../Model/user')
 const UserAddress=require('../Model/userAddress')
-const orderItem = async (req, res) => {
+exports . orderItem = async (req, res) => {
   try {
     const { userId, products } = req.body;
 
@@ -114,7 +114,7 @@ const orderItem = async (req, res) => {
 };
 
 
-  const getAllOrders = async (req, res) => {
+exports . getAllOrders = async (req, res) => {
     try {
         const orders = await Order.find().sort({ createdAt: -1 })
           .populate("userId", "name email mobileNo") // Get user details
@@ -136,12 +136,12 @@ const orderItem = async (req, res) => {
   };
 
 
-const orderCancel = async (req, res) => {
+  exports . orderCancel = async (req, res) => {
 
     try {
-        const { orderId } = req.params;
+        const { id } = req.params;
     
-        const order = await Order.findById(orderId);
+        const order = await Order.findById(id);
         if (!order) {
           return res.status(404).json({ error: "Order not found" });
         }
@@ -174,11 +174,11 @@ const orderCancel = async (req, res) => {
 
 };
 
-const Getorder = async (req, res) => {
+exports . Getorder = async (req, res) => {
 
     try {
-        const { orderId } = req.params;
-        const order = await Order.findById(orderId).populate("products.productId");
+        const { id } = req.params;
+        const order = await Order.findById(id).populate("products.productId");
         
         if (!order) {
           return res.status(404).json({ error: "Order not found" });
@@ -192,12 +192,12 @@ const Getorder = async (req, res) => {
 
 };
 
-const orderUpdate = async (req, res) => {
+exports . orderUpdate = async (req, res) => {
     try {
-        const { orderId } = req.params;
+        const { id } = req.params;
         const { status, paymentStatus } = req.body;
     
-        const order = await Order.findById(orderId);
+        const order = await Order.findById(id);
         if (!order) {
           return res.status(404).json({ error: "Order not found" }); 
         }
@@ -215,4 +215,4 @@ const orderUpdate = async (req, res) => {
 
 
 };
-module.exports = { orderItem, orderCancel, Getorder, orderUpdate,getAllOrders }
+

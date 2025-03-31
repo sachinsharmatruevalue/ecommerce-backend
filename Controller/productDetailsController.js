@@ -1,5 +1,5 @@
 const ProductDetails = require("../Model/productDetails");
-
+const mongoose = require("mongoose"); 
 exports.create = async (req, res) => {
   try {
     const product = await ProductDetails.create(req.body);
@@ -51,40 +51,43 @@ exports.delete = async (req, res) => {
   }
 };
 exports.getAll = async (req, res) => {
-  try {
-    const product = await ProductDetails.find().sort({ created: -1 });
-    if (!product) {
-      return res
-        .status(404)
-        .json({ status: false, message: "Product Detail  Not Found" });
-    }
-    res
-      .status(200)
-      .json({
+ 
+    try {
+      const productDetails = await ProductDetails.find()
+        .populate("product") // Fetch full product details
+        .exec();
+  
+      res.status(200).json({
         status: true,
-        message: " Product Detail  Fetch Successfuly",
-        data: product,
+        message: "Product details fetched successfully",
+        data: productDetails
       });
-  } catch (err) {
-    res.status(500).json({ status: false, error: err.message });
-  }
+    } catch (err) {
+      res.status(400).json({ status: false, error: err.message });
+    }
+
 };
 exports.getById = async (req, res) => {
   try {
-    const id = req.params.id;
-    const product =  await ProductDetails.findById(id).populate('product');
-    if (!product) {
-      return res
-        .status(404)
-        .json({ status: false, message: "Product Detail  Not Found" });
+    const { id } = req.params;
+
+    // Validate if ID is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ status: false, message: "Invalid Product Detail ID" });
     }
-    res
-      .status(200)
-      .json({
-        status: true,
-        message: "Product Detail  Fetch Successfully",
-        data: product,
-      });
+
+    // Fetch product details and populate the associated product
+    const productDetail = await ProductDetails.findById(id).populate("product").exec();
+
+    if (!productDetail) {
+      return res.status(404).json({ status: false, message: "Product Detail Not Found" });
+    }
+
+    res.status(200).json({
+      status: true,
+      message: "Product Detail Fetched Successfully",
+      data: productDetail,
+    });
   } catch (err) {
     res.status(500).json({ status: false, error: err.message });
   }
