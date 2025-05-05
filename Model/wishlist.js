@@ -6,11 +6,15 @@ const wishlistSchema = new mongoose.Schema(
         products: [
             {
                 productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true }, // ✅ Fixed case
+                
                 addedAt: { type: Date, default: Date.now },
             },
+            
         ],
     },
-    { timestamps: true }
+    {
+        timestamps: true, // <-- This adds createdAt and updatedAt automatically
+      }
 );
 
 const Wishlist = mongoose.models.Wishlist || mongoose.model("Wishlist", wishlistSchema);

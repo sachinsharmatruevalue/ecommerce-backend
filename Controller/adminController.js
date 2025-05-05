@@ -3,14 +3,10 @@ const Admin = require("../Model/admin");
 const bcrypt = require("bcrypt");
 const User = require("../Model/user");
 const Product = require("../model/product");
-const Category = require("../model/category");
-const SubCategory = require("../model/subCategory");
-const Brand = require("../model/brand");
-const Banner=require("../Model/banner");
-const Order=require("../Model/order");
 
-const Notification=require("../Model/notification");
-const Blog=require("../Model/blog");
+const Order=require("../Model/orders");
+const moment = require("moment");
+
 const path = require("path");
 const fs = require("fs");
 exports.register = async (req, res) => {
@@ -211,38 +207,112 @@ exports.getProfile = async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
 }
 
-};exports.dashboardTotal = async (req, res) => {
+};
+exports.dashboardTotal = async (req, res) => {
   try {
-
-
+    // Basic counts
     const totalUsers = await User.countDocuments();
     const totalProducts = await Product.countDocuments();
-    const totalCategories = await Category.countDocuments();
-    const totalSubcategories = await SubCategory.countDocuments();
-    const totalBrands = await Brand.countDocuments();
-    const activeBanners = await Banner.countDocuments({ status: "Active" });
-
     const totalOrders = await Order.countDocuments();
+
+    const OrderPending = await Order.countDocuments({ paymentStatus: "pending" });
+  
+    const OrderShipped = await Order.countDocuments({ orderStatus: "Shipped" });
+    const OrderDelivered = await Order.countDocuments({ orderStatus: "Delivered" });
+    const OrderCancelled = await Order.countDocuments({ orderStatus: "Cancel" });
+   
+
+    const COD = await Order.countDocuments({ paymentMethod: "COD" });
  
+    const PAYUMONEY = await Order.countDocuments({ paymentMethod: 'PAYUMONEY' });
+    const BINANCE = await Order.countDocuments({ paymentMethod:  'BINANCE' });
+    const CREDIT_CARD = await Order.countDocuments({ paymentMethod:'CREDIT_CARD' });
+    const totalAmountData = await Order.aggregate([
+      { $group: { _id: null, total: { $sum: "$totalAmount" } } }
+    ]);
+    const totalAmount = totalAmountData[0]?.total || 0;
 
-  
+    // 🟢 Monthly Orders (last 12 months)
+    const monthlyStart = moment().subtract(11, "months").startOf("month");
+    const monthlyOrdersData = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: monthlyStart.toDate() }
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
 
-    const totalNotifications = await Notification.countDocuments();
-    const totalBlogs = await Blog.countDocuments();
+    const monthlyLabels = [];
+    const monthlyOrders = [];
 
-  
+    for (let i = 0; i < 12; i++) {
+      const date = moment().subtract(11 - i, "months");
+      const label = date.format("MMM");
+      const key = date.format("YYYY-MM");
+
+      monthlyLabels.push(label);
+      const match = monthlyOrdersData.find(item => item._id === key);
+      monthlyOrders.push(match ? match.count : 0);
+    }
+
+    // 🟢 Weekly Orders (last 7 days)
+    const weeklyStart = moment().subtract(6, "days").startOf("day");
+    const weeklyOrdersData = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: weeklyStart.toDate() }
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    const weeklyLabels = [];
+    const weeklyOrders = [];
+
+    for (let i = 0; i < 7; i++) {
+      const date = moment().subtract(6 - i, "days");
+      const label = date.format("ddd"); // Mon, Tue...
+      const key = date.format("YYYY-MM-DD");
+
+      weeklyLabels.push(label);
+      const match = weeklyOrdersData.find(item => item._id === key);
+      weeklyOrders.push(match ? match.count : 0);
+    }
 
     const response = {
       totalUsers,
       totalProducts,
-      totalCategories,
-      totalSubcategories,
-      totalBrands,
-      activeBanners,
       totalOrders,
+      OrderPending,
+     
+      OrderShipped,
+      OrderDelivered,
+      OrderCancelled,
     
-      totalNotifications,
-      totalBlogs,
+      totalAmount,
+      COD,
+      
+       CREDIT_CARD,
+       BINANCE,
+        PAYUMONEY,
+
+      monthlyLabels,
+      monthlyOrders,
+      weeklyLabels,
+      weeklyOrders
     };
 
     res.status(200).json({
@@ -250,6 +320,7 @@ exports.getProfile = async (req, res) => {
       message: "Dashboard counts fetched successfully",
       data: response,
     });
+
   } catch (error) {
     console.error("Error fetching dashboard counts:", error);
     res.status(500).json({
@@ -260,6 +331,8 @@ exports.getProfile = async (req, res) => {
   }
 };
 
+
+
 exports.me = async (req, res) => {
   try {
     const user = await Admin.findById(req.user._id);
@@ -267,7 +340,7 @@ exports.me = async (req, res) => {
 
     res.status(200).json({ status: true, data: user });
   } catch (error) {
-    handleError(res, error);
+    console.error("Error fetching:", error);
   }
 };
 

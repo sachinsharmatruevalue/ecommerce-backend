@@ -2,10 +2,9 @@ const Product = require("../model/product");
 const Category = require("../model/category");
 const SubCategory = require("../model/subCategory");
 const Brand = require("../model/brand");
-const User=require("../Model/user");
 const path = require("path");
 const fs = require("fs");
-
+const mongoose = require("mongoose");
 exports.CreateProduct = async (req, res) => {
   try {
     if (req.files.images && req.files.images.length > 0) {
@@ -54,7 +53,7 @@ exports.GetAllProduct = async (req, res) => {
     .populate("subCategory") // Populate subcategory field, only returning 'name'
     .populate("brand")
 
-  .sort({ created: -1 });
+    .sort({ createdAt: -1 });
 
     if (product.length === 0) {
       return res
@@ -117,7 +116,6 @@ exports.DeleteProduct = async (req, res) => {
     res.status(500).json({ status: false, error: err.message });
   }
 };
-
 exports.UpdateProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -128,6 +126,27 @@ exports.UpdateProduct = async (req, res) => {
       return res.status(404).json({ status: false, message: "Product not found" });
     }
 
+    // Ensure refundPolicies is a valid object
+    let refundPolicies = req.body.refundPolicies;
+    
+    // Handle case where refundPolicies is sent as a string
+    if (typeof refundPolicies === "string") {
+      try {
+        refundPolicies = JSON.parse(refundPolicies); // Attempt to parse string as JSON
+      } catch (err) {
+        refundPolicies = { returnable: false, returnWindow: 30 }; // Default fallback
+      }
+    }
+
+    // Validate refundPolicies object
+    if (typeof refundPolicies === "object" && refundPolicies !== null) {
+      refundPolicies.returnable = refundPolicies.returnable === "true" || refundPolicies.returnable === true;  // Ensure "true" is treated as true
+      refundPolicies.returnWindow = typeof refundPolicies.returnWindow === "number" 
+        ? refundPolicies.returnWindow 
+        : parseInt(refundPolicies.returnWindow) || 30;  // Default to 30 if invalid
+    } else {
+      refundPolicies = { returnable: false, returnWindow: 30 }; // Default
+    }
     // Fetch Category, SubCategory, and Brand Names
     const categoryDocs = await Category.find({ _id: { $in: req.body.category || [] } });
     const subCategoryDocs = await SubCategory.find({ _id: { $in: req.body.subCategory || [] } });
@@ -138,8 +157,9 @@ exports.UpdateProduct = async (req, res) => {
     req.body.subCategoryname = subCategoryDocs.map((sub) => sub.name);
     req.body.brandname = brandDoc ? brandDoc.name : "";
 
-    // Separate images from the request body
-    const { images, ...updateFields } = req.body;
+    // Separate images and refund policies from the request body
+    const { images, refundpolicies, ...updateFields } = req.body;
+    updateFields.refundPolicies = refundPolicies; // Add parsed refundPolicies to updateFields
 
     // Ensure productkey is properly parsed if sent as a JSON string
     if (typeof updateFields.productkey === "string") {
@@ -169,20 +189,27 @@ exports.UpdateProduct = async (req, res) => {
     res.status(500).json({ status: false, error: err.message });
   }
 };
+
+
+
 exports.GetByIdProduct = async (req, res) => {
- 
   try {
-    const id = req.params.id;
-    const product = await Product.findById(id).populate('category','subCategory','Brand');
-    res
-      .status(400)
-      .json({
-        status: true,
-        message: " Product fetch Successfully",
-        data: product,
-      });
-  } catch (err) {
-    res.status(500).json({ status: false, error: err.message });
+    const { id } = req.params;
+
+    // Validate if ID is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ status: false, message: "Invalid Product ID" });
+    }
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ status: false, message: "Product Detail Not Found" });
+    }
+
+    res.json({ status: true, data: product });
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    res.status(500).json({ status: false, message: "Server Error" });
   }
 };
 
@@ -247,5 +274,169 @@ exports.deletedProductimage = async (req, res) => {
   }
 
 };
+
+exports.getProductByCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    // console.log('id------------',id);
+    if (!id) {
+      return res.status(400).json({
+        status: 400,
+        message: "Category ID is required",
+        success: false
+      });
+    }
+    let productsArray = await Product.find({ category: id }).populate('category');
+    if (productsArray.length > 0) {
+      const modifiedArray = productsArray.map((element) => {
+        const productObj = element.toObject();
+        if (productObj.image) {
+          productObj.image = `${process.env.SERVER_LOCALHOST}:${process.env.SERVER_PORT}/uploads/${productObj.image}`;
+        }
+        return productObj;
+      });
+      return res.json({
+        status: 200,
+        message: "Products retrieved successfully",
+        success: true,
+        data: modifiedArray
+      });
+    } else {
+      return res.json({
+        status: 404,
+        message: "No products found for this category",
+        success: true,
+        data: []
+      });
+    }
+  } catch (error) {
+    console.error("Error in getProductByCategory:", error);
+    return res.status(500).json({
+      status: 500,
+      message: error.message || "Internal server error",
+      success: false
+    });
+  }
+};
+exports.getProductBySubCategory = async (req, res) => {
+  try {
+    let SITE_URL = `${process.env.HOST}${process.env.PORT}`
+    const { id } = req.body;
+    // console.log(req.query);
+    // return
+    let productsArray = await Product.find({ id })
+    if (productsArray.length > 0) {
+      const modifiedArray = productsArray.map((element, index) => {
+        if (element.image) {
+          return {
+            ...element.toObject(),
+            image: `${process.env.SERVER_LOCALHOST}:${process.env.SERVER_PORT}/uploads/${element.image}`
+          };
+        } else {
+          return element;
+        }
+      });
+      //             console.log("element.image",modifiedArray);
+      // return
+      return res.json({
+        status: 200,
+        message: "productlist_sucessfully",
+        success: true,
+        data: modifiedArray
+      })
+    } else {
+      throw "..."
+    }
+  } catch (error) {
+    return res.json({
+      status: 400,
+      message: error.message || "Bad request",
+      success: false
+    })
+  }
+}
+
+
+// exports.searchProduct = async (req, res) => {
+//   try {
+//     const { product_name } = req.body;
+
+//     if (!product_name) {
+//       return res.status(400).send({
+//         success: false,
+//         message: 'Provide the product name to search'
+//       });
+//     }
+
+//     const products = await Product.find({
+//       name: { $regex: product_name, $options: 'i' }
+//     })
+//       .populate('category')
+//       .populate('subCategory')
+//     console.log("products",products);
+
+//     if (products.length > 0) {
+//       return res.status(200).send({
+//         success: true,
+//         message: 'Products found successfully',
+//         data: products
+//       });
+//     } else {
+//       return res.status(404).send({
+//         success: false,
+//         message: 'No matching products found'
+//       });
+//     }
+//   } catch (error) {
+//     console.error('Search error:', error);
+//     res.status(500).send({
+//       success: false,
+//       message: 'Internal Server Error'
+//     });
+//   }
+// };
+
+exports.searchProduct = async (req, res) => {
+  try {
+    const { category_name } = req.body;
+   console.log('category',category_name )
+    if (!category_name) {
+      return res.status(400).send({
+        success: false,
+        message: 'Provide the category name to search'
+      });
+    }
+
+    // Find the category by name
+    const category = await Category.findOne({
+      name: { $regex: category_name, $options: 'i' }
+    });
+
+    if (!category) {
+      return res.status(404).send({
+        success: false,
+        message: 'No matching category found'
+      });
+    }
+
+    // Return only the category name
+    return res.status(200).send({
+      success: true,
+      message: 'Category found',
+      category: {
+        _id: category._id,
+        name: category.name
+      }
+    });
+
+  } catch (error) {
+    console.error('Search error:', error);
+    res.status(500).send({
+      success: false,
+      message: 'Internal Server Error'
+    });
+  }
+};
+
 
 

@@ -1,26 +1,28 @@
 const express = require('express');
 const router = express.Router();
 const cartController = require('../Controller/cartController.js');
-
+const {isAuth}=require('../Middleware/auth.js')
 
 router
 .route('/')
-.post(cartController.addToCart)
+.post(isAuth,cartController.addToCart)
 
 router
 .route('/:id')
-.get(cartController.getCart)
+.get(isAuth,cartController.getCart)
 router
 .route('/')
-.get(cartController.getAllCart)
+.get(isAuth,cartController.getAllCart)
 
 router
 .route('/')
-.get(cartController.cartCount)
+.get(isAuth,cartController.cartCount)
 
-router
-.route('/:id')
-.delete(cartController.cartRemove)
+router.delete('/:cartId/item/:itemId',isAuth, cartController.removeCartItem);
+router.get('/:cartId/item/:itemId',isAuth, cartController.UpdatedQunatity);
+
+
+
 
 
 

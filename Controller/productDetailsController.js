@@ -1,4 +1,5 @@
 const ProductDetails = require("../Model/productDetails");
+const Product=require("../model/product")
 const mongoose = require("mongoose"); 
 exports.create = async (req, res) => {
   try {
@@ -71,24 +72,18 @@ exports.getById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Validate if ID is a valid MongoDB ObjectId
+    // Validate if ID is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ status: false, message: "Invalid Product Detail ID" });
+      return res.status(400).json({ status: false, message: "Invalid Product ID" });
     }
 
-    // Fetch product details and populate the associated product
-    const productDetail = await ProductDetails.findById(id).populate("product").exec();
-
-    if (!productDetail) {
+    const product = await Product.findById(id);
+    if (!product) {
       return res.status(404).json({ status: false, message: "Product Detail Not Found" });
     }
 
-    res.status(200).json({
-      status: true,
-      message: "Product Detail Fetched Successfully",
-      data: productDetail,
-    });
-  } catch (err) {
-    res.status(500).json({ status: false, error: err.message });
+    res.json({ status: true, data: product });
+  } catch (error) {
+    res.status(500).json({ status: false, message: "Server Error" });
   }
 };

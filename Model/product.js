@@ -12,11 +12,15 @@ const productSchema = new mongoose.Schema(
       type: String,
       trim: true, // Remove extra spaces
     },
+    Sortdescription: {
+      type: String,
+      trim: true, // Remove extra spaces
+    },
     productkey: [
       {
         Size: {
           type: String,
-         
+          required: true,
         },
         Quantity: {
           type: Number,
@@ -26,15 +30,22 @@ const productSchema = new mongoose.Schema(
        
         OfferPrice: {
           type: Number,
+          required: true,
           min: 0,
         },
       },
     ],
+    Originalprice: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
     price: {
       type: Number,
       required: true,
       min: 0,
     },
+
     brand: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -57,7 +68,9 @@ const productSchema = new mongoose.Schema(
       {
         type: String,
       },
-    ],
+    ]
+     
+    ,
     category: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -76,6 +89,23 @@ const productSchema = new mongoose.Schema(
         required: true,
       },
     ],
+    refundPolicies: {
+      returnable: {
+        type: Boolean,
+        default: false,
+      },
+      returnWindow: {
+        type: Number, // number of days allowed for return
+        default: 30,
+      },
+    },
+    rating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+    },
+
     status: {
       type: String,
       enum: ["Active", "Inactive"],

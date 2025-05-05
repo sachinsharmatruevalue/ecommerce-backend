@@ -4,30 +4,30 @@ exports.CreateUserAddress = async (req, res) => {
   try {
     console.log("Received Data:", req.body);  // ✅ Debugging log
 
-     // Check if category ID is provided
-        if (!req.body.user) {
-          return res
-            .status(400)
-            .json({ status: false, message: "User ID is required" });
-        }
-          const userDoc = await User.findById(req.body.user);
-        
-            if (!userDoc) {
-              return res
-                .status(404)
-                .json({ status: false, message: "User not found" });
-            }
-        
-            // Assign category name
-            req.body.username = userDoc.name;
-    // Check if all required fields exist
-    const { street, city, state, postalCode, country, address } = req.body;
-    if (!street || !city || !state || !postalCode || !country || !address) {
+    // Use userId instead of user
+  const userId = req.user._id;
+
+    if (!userId) {
+      return res
+        .status(400)
+        .json({ status: false, message: "User ID is required" });
+    }
+
+    const userDoc = await User.findById(userId);
+    if (!userDoc) {
+      return res
+        .status(404)
+        .json({ status: false, message: "User not found" });
+    }
+
+    req.body.username = userDoc.name;
+   console.log('req',req.body)
+    const { firstName, lastName, phone, address, city, state, pincode, country } = req.body;
+
+    if ( !firstName || !lastName  ||!phone || !address || !city || !state || !pincode || !country) {
       return res.status(400).json({ status: false, message: "All fields are required" });
     }
-    
 
-    // Create address
     const newAddress = await UserAddress.create(req.body);
     console.log("Saved Address:", newAddress); // ✅ Debugging log
 
@@ -37,11 +37,49 @@ exports.CreateUserAddress = async (req, res) => {
     res.status(400).json({ status: false, error: err.message });
   }
 };
+// exports.CreateUserAddress = async (req, res) => {
+//   try {
+//     console.log("Received Data:", req.body);
+
+//     const userId = req.user._id;
+
+//     if (!userId) {
+//       return res
+//         .status(400)
+//         .json({ status: false, message: "User ID is required" });
+//     }
+
+//     const userDoc = await User.findById(userId);
+//     if (!userDoc) {
+//       return res
+//         .status(404)
+//         .json({ status: false, message: "User not found" });
+//     }
+
+//     req.body.username = userDoc.name;
+//     req.body.userId = userId; // ✅ ADD THIS LINE
+
+//     console.log('req', req.body);
+
+//     const { name, phone, address, city, state, pincode, country } = req.body;
+
+//     if (!name || !phone || !address || !city || !state || !pincode || !country) {
+//       return res.status(400).json({ status: false, message: "All fields are required" });
+//     }
+
+//     const newAddress = await UserAddress.create(req.body);
+//     console.log("Saved Address:", newAddress);
+
+//     res.status(201).json({ status: true, message: "User Address created", data: newAddress });
+//   } catch (err) {
+//     console.error("Database Error:", err);
+//     res.status(400).json({ status: false, error: err.message });
+//   }
+// };
 
 exports.GetAllAddresses = async (req, res) => {
   try {
     const addresses = await UserAddress.find()
-      .populate("user", "username") // Populate user details (adjust field names accordingly)
       .sort({ created: -1 });
 
     if (!addresses.length) {
@@ -108,14 +146,15 @@ exports.GetByIdUserAddress = async (req, res) => {
 
   try {
     const id = req.params.id;
-    const address = await UserAddress.findById(id).populate('user');
+    const address = await UserAddress.findById(id);
+    console.log("Fetched ID from route params:", id);
     if (address.length == 0) {
       return res
         .status(404)
         .json({ status: false, messgae: "userAddress Not Found" });
     }
     res
-      .status(400)
+      .status(200)
       .json({
         status: true,
         message: "userAddress Fetch Successfully",
@@ -125,3 +164,28 @@ exports.GetByIdUserAddress = async (req, res) => {
     res.status(500).json({ status: false, error: err.message });
   }
 };
+
+
+exports.MyAllAddresses = async (req, res) => {
+  const userId = req.user._id; // The userId is from the authenticated request
+  console.log("User ID from authenticated request:", userId);
+  try {
+    // Find the user's addresses by userId
+    const addresses = await UserAddress.find({ userId: userId }).select('firstName lastName phone address landmark city state pincode country status');
+
+    if (addresses.length === 0) {
+      return res.status(404).json({ success: false, message: 'No addresses found for this user' });
+    }
+
+    return res.status(200).json({ success: true, data: addresses });
+  } catch (error) {
+    console.error('Error fetching user addresses:', error);
+    return res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+
+
+
+
+

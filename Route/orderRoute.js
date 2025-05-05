@@ -1,30 +1,36 @@
-const express = require('express');
-const router = express.Router();
-const orderController = require('../Controller/orderController.js');
+// const express = require('express');
+// const router = express.Router();
+// const orderController = require('../Controller/orderController.js');
+// const {isAuth}=require('../Middleware/auth.js')
 
+// router
+// .route('/')
+// .post(isAuth,orderController.orderItem)
 
-router
-.route('/')
-.post(orderController.orderItem)
+// router
+// .route('/:id')
+// .delete(isAuth,orderController.orderCancel)
 
-router
-.route('/:id')
-.delete(orderController.orderCancel)
+// router
+// .route('/:id')
+// .get(isAuth,orderController.Getorder)
+// router
+// .route('/')
+// .get(isAuth,orderController.getAllOrders)
 
-router
-.route('/:id')
-.get(orderController.Getorder)
-router
-.route('/')
-.get(orderController.getAllOrders)
-
-router 
-.route('/:id')
-.get(orderController.orderUpdate)
-
-
-
+// router 
+// .route('/:id')
+// .get(isAuth,orderController.orderUpdate)
 
 
 
-module.exports=router
+// router 
+// .route('/track/:userId')
+// .get(orderController.trackOrder)
+
+
+
+
+
+
+// module.exports=router

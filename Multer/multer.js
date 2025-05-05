@@ -28,6 +28,7 @@ exports.uploadHandler = (req, res, next) => {
     { name: "logo", maxCount: 1 },
     { name: "idImage", maxCount: 1 },
     { name: "document", maxCount: 1 },
+    { name: "existingImages", maxCount: 20 },
   ];
   upload.fields(uploadFields)(req, res, next);
 };

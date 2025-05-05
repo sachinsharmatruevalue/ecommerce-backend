@@ -4,9 +4,10 @@ const Wishlist = require('../Model/wishlist');
 
 exports.addToWishlist = async (req, res) => {
     try {
+        console.log('User:', req.user);
         const { userId } = req.params; // ✅ Ensure userId is obtained from URL
         const { productId } = req.body;
-
+       
         if (!userId) {
             return res.status(400).json({ success: false, message: "User ID is required" });
         }
@@ -33,7 +34,7 @@ exports.addToWishlist = async (req, res) => {
 exports.getWishlist = async (req, res) => {
     try {
         const wishlist = await Wishlist.findOne({ userId: req.params.userId })
-            .populate("products.productId", "name price images")
+            .populate("products.productId", "name price images productkey")
             .exec();
 
         if (!wishlist) {
@@ -119,7 +120,7 @@ exports. getAllWishlist = async (req, res) => {
             })
             .populate({
                 path: "products.productId", 
-                select: "name price images"
+                select: "name price images productkey"
             })
             .exec(); // ✅ Ensure execution of query
 
@@ -129,6 +130,50 @@ exports. getAllWishlist = async (req, res) => {
         res.status(500).json({ success: false, message: "Error fetching wishlists", error: error.message });
     }
 };
+exports.getWishlistCount = async (req, res) => {
+    try {
+      const { userId } = req.params;
+  
+      if (!userId) {
+        return res.status(400).json({ success: false, message: "User ID is required" });
+      }
+  
+      const wishlist = await Wishlist.findOne({ userId });
+  
+      const count = wishlist ? wishlist.products.length : 0;
+  
+      res.json({ success: true, count });
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  };
+
+  exports.MyWhislist=async(req,res)=>
+  {
+    const userId = req.user._id;
+  
+    try {
+      // Find user's wishlist and populate the packages
+      let wishlist = await Wishlist.findOne({ userId: userId }).populate({
+        path: "userId", 
+        select: "name email" // ✅ Ensuring userId is fully populated
+    })
+    .populate({
+        path: "products.productId", 
+        select: "name price images productkey"
+    })
+
+      
+      if (!wishlist) {
+        return res.status(404).json({ success: false, message: 'Wishlist not found' });
+      }
+  
+      res.status(200).json({ success: true, data:wishlist });
+    } catch (error) {
+      console.error('Error fetching wishlist:', error);
+      res.status(500).json({ success: false, message: 'Server Error' });
+    }
+  }
 
 
 

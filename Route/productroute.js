@@ -24,5 +24,10 @@ router
 
 router.route("/").delete(productController.deletedProductimage);
 
+router.route('/product-list-by-categoryId/:id').get(productController.getProductByCategory);
+router.route('/product-list-by-subcategoryId/:id').get(productController.getProductBySubCategory);
+router.route('/search').post(productController.searchProduct)
+
+
 
 module.exports = router;
